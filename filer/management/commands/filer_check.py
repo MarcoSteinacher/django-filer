@@ -121,9 +121,12 @@ class Command(BaseCommand):
             for child in child_dirs:
                 walk(os.path.join(prefix, child))
 
-        filer_public = filer_settings.FILER_STORAGES['public']['main']
-        storage = import_string(filer_public['ENGINE'])()
-        walk(filer_public['UPLOAD_TO_PREFIX'])
+        for storage_name in filer_settings.FILER_STORAGES:
+            storage_settings = filer_settings.FILER_STORAGES[storage_name]['main']
+            storage = import_string(storage_settings['ENGINE'])()
+            if 'location' in storage_settings['OPTIONS']:
+                storage.location = storage_settings['OPTIONS']['location']
+            walk(storage_settings['UPLOAD_TO_PREFIX'])
 
     def image_dimensions(self, options):
         from django.db.models import Q
